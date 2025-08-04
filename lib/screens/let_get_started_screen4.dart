@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'welcome_screen.dart';
 
 class LetGetStartedScreen4 extends StatefulWidget {
-  const LetGetStartedScreen4({super.key});
+  final String verificationId;
+
+  const LetGetStartedScreen4({super.key, required this.verificationId});
 
   @override
   State<LetGetStartedScreen4> createState() => _LetGetStartedScreen4State();
@@ -11,6 +14,8 @@ class LetGetStartedScreen4 extends StatefulWidget {
 class _LetGetStartedScreen4State extends State<LetGetStartedScreen4> {
   List<String> code = ['', '', '', '', '', ''];
   int currentIndex = 0;
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   void _onKeyboardTap(String value) {
     setState(() {
@@ -32,12 +37,33 @@ class _LetGetStartedScreen4State extends State<LetGetStartedScreen4> {
 
   bool get isCodeComplete => !code.contains('');
 
-  void _continue() {
+  void _continue() async {
     if (isCodeComplete) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const WelcomeScreen()),
-      );
+      String smsCode = code.join('');
+      print("Entered Code: $smsCode");
+
+      try {
+        PhoneAuthCredential credential = PhoneAuthProvider.credential(
+          verificationId: widget.verificationId,
+          smsCode: smsCode,
+        );
+
+        await _auth.signInWithCredential(credential);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Verification successful!')),
+        );
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const WelcomeScreen()),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Invalid code. Please try again.')),
+        );
+        print("Verification Error: $e");
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter the complete code')),
@@ -50,7 +76,7 @@ class _LetGetStartedScreen4State extends State<LetGetStartedScreen4> {
       child: InkWell(
         onTap: onTap,
         child: Container(
-          height: 50, // Thoda chhota
+          height: 50,
           margin: const EdgeInsets.all(2),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -117,7 +143,7 @@ class _LetGetStartedScreen4State extends State<LetGetStartedScreen4> {
         children: [
           // White section
           Expanded(
-            flex: 7, // Zyada jagah headings ke liye
+            flex: 7,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
@@ -135,8 +161,8 @@ class _LetGetStartedScreen4State extends State<LetGetStartedScreen4> {
                       const Text(
                         "Let's Get Started",
                         style: TextStyle(
-                          fontSize: 28, // Bada
-                          fontWeight: FontWeight.w900, // Zyada bold
+                          fontSize: 28,
+                          fontWeight: FontWeight.w900,
                           color: Colors.black,
                         ),
                       ),
@@ -149,8 +175,8 @@ class _LetGetStartedScreen4State extends State<LetGetStartedScreen4> {
                     child: Text(
                       'Enter the 6-digit code',
                       style: TextStyle(
-                        fontSize: 22, // Bada
-                        fontWeight: FontWeight.w800, // Zyada bold
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
                         color: Colors.black,
                       ),
                     ),
@@ -177,13 +203,13 @@ class _LetGetStartedScreen4State extends State<LetGetStartedScreen4> {
                   ),
                   const SizedBox(height: 24),
                   SizedBox(
-                    width: 200, // Thoda chhota button
+                    width: 200,
                     child: ElevatedButton(
                       onPressed: _continue,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: isCodeComplete
                             ? Colors.blueAccent
-                            : Color(0xFFC7EFFF),
+                            : const Color(0xFFC7EFFF),
                         foregroundColor: Colors.black,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         side: const BorderSide(color: Colors.blueAccent),
@@ -206,9 +232,9 @@ class _LetGetStartedScreen4State extends State<LetGetStartedScreen4> {
             ),
           ),
 
-          // Grey section
+          // Grey keypad
           Expanded(
-            flex: 5, // Kam jagah keyboard ke liye
+            flex: 5,
             child: Container(
               width: double.infinity,
               color: Colors.grey.shade300,

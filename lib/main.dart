@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 // ✅ Import your screens here
 import 'screens/create_account_screen.dart';
@@ -41,7 +43,22 @@ import 'screens/manage_options_screen.dart';
 import 'screens/profile_data_screen.dart';
 import 'screens/settings_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // ✅ Initialize Firebase before runApp
+  await Firebase.initializeApp(
+    options: const FirebaseOptions(
+      apiKey: "AIzaSyDa5z3frun5PXpt_kV9BY-q7yKZ1fhNV1U",
+      authDomain: "fir-authproject-73ffc.firebaseapp.com",
+      projectId: "fir-authproject-73ffc",
+      storageBucket: "fir-authproject-73ffc.appspot.com",
+      messagingSenderId: "705935518204",
+      appId: "1:705935518204:web:e1077db5c6e2ab7a8e2a79",
+      measurementId: "G-MGMRZ8HTDB",
+    ),
+  );
+
   runApp(const SparkleDatingApp());
 }
 
@@ -55,29 +72,21 @@ class SparkleDatingApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         fontFamily: 'Poppins',
-
-        // ✅ USE colorScheme for modern Material widgets
         colorScheme: ColorScheme.fromSwatch().copyWith(
-          primary: const Color(0xFFFFD6A5), // Your main color
-          secondary: const Color(0xFFFFD6A5), // Use same if needed
+          primary: const Color(0xFFFFD6A5),
+          secondary: const Color(0xFFFFD6A5),
         ),
-
-        // ✅ Still provide legacy primaryColor for fallback
         primaryColor: const Color(0xFFFFD6A5),
-
-        // ✅ ElevatedButton global theme
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFFFD6A5), // Primary color
-            foregroundColor: Colors.black, // Text/Icon color
+            backgroundColor: const Color(0xFFFFD6A5),
+            foregroundColor: Colors.black,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(30),
             ),
             padding: const EdgeInsets.symmetric(vertical: 16),
           ),
         ),
-
-        // ✅ BottomNavigationBar theme
         bottomNavigationBarTheme: const BottomNavigationBarThemeData(
           backgroundColor: Color(0xFFFFD6A5),
           selectedItemColor: Colors.black,
@@ -92,7 +101,10 @@ class SparkleDatingApp extends StatelessWidget {
         '/let_get_started1': (context) => LetGetStartedScreen1(),
         '/let_get_started2': (context) => LetGetStartedScreen2(),
         '/let_get_started3': (context) => LetGetStartedScreen3(),
-        '/let_get_started4': (context) => LetGetStartedScreen4(),
+        '/let_get_started4': (context) => LetGetStartedScreen4(
+          verificationId:
+              '', // ✅ Jab navigate karo to sahi verificationId bhejo!
+        ),
         '/welcome': (context) => WelcomeScreen(),
         '/about_you1': (context) => const AboutYou1Screen(),
         '/about_you2': (context) => const AboutYou2Screen(),

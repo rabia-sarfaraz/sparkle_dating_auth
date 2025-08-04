@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'let_get_started_screen4.dart';
 
 class LetGetStartedScreen3 extends StatefulWidget {
@@ -10,6 +11,7 @@ class LetGetStartedScreen3 extends StatefulWidget {
 
 class _LetGetStartedScreen3State extends State<LetGetStartedScreen3> {
   final TextEditingController _numberController = TextEditingController();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   String selectedCountry = 'IN';
   String countryCode = '+91';
@@ -37,15 +39,42 @@ class _LetGetStartedScreen3State extends State<LetGetStartedScreen3> {
     });
   }
 
-  void _verify() {
+  void _verify() async {
     if (_numberController.text.isEmpty) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Please enter your number')));
     } else {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const LetGetStartedScreen4()),
+      String phoneNumber = '$countryCode${_numberController.text}';
+      print('Sending OTP to: $phoneNumber');
+
+      await _auth.verifyPhoneNumber(
+        phoneNumber: phoneNumber,
+        timeout: const Duration(seconds: 60),
+        verificationCompleted: (PhoneAuthCredential credential) async {
+          // Auto-verification
+          await _auth.signInWithCredential(credential);
+          print("Auto Verified!");
+        },
+        verificationFailed: (FirebaseAuthException e) {
+          print("Verification Failed: ${e.message}");
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text("Failed: ${e.message}")));
+        },
+        codeSent: (String verificationId, int? resendToken) {
+          print('Verification ID: $verificationId');
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  LetGetStartedScreen4(verificationId: verificationId),
+            ),
+          );
+        },
+        codeAutoRetrievalTimeout: (String verificationId) {
+          print('Timeout: $verificationId');
+        },
       );
     }
   }
@@ -55,7 +84,7 @@ class _LetGetStartedScreen3State extends State<LetGetStartedScreen3> {
       child: InkWell(
         onTap: onTap,
         child: Container(
-          height: 50, // Chhoti height
+          height: 50,
           margin: const EdgeInsets.all(2),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -95,7 +124,7 @@ class _LetGetStartedScreen3State extends State<LetGetStartedScreen3> {
         children: [
           // White section
           Expanded(
-            flex: 7, // Thoda zyada space
+            flex: 7,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
@@ -113,8 +142,8 @@ class _LetGetStartedScreen3State extends State<LetGetStartedScreen3> {
                       const Text(
                         "Let's Get Started",
                         style: TextStyle(
-                          fontSize: 28, // Bada
-                          fontWeight: FontWeight.w900, // Zyada bold
+                          fontSize: 28,
+                          fontWeight: FontWeight.w900,
                           color: Colors.black,
                         ),
                       ),
@@ -127,8 +156,8 @@ class _LetGetStartedScreen3State extends State<LetGetStartedScreen3> {
                     child: Text(
                       'Enter Your Number',
                       style: TextStyle(
-                        fontSize: 22, // Bada
-                        fontWeight: FontWeight.w800, // Zyada bold
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
                         color: Colors.black,
                       ),
                     ),
@@ -217,11 +246,11 @@ class _LetGetStartedScreen3State extends State<LetGetStartedScreen3> {
                   ),
                   const SizedBox(height: 24),
                   SizedBox(
-                    width: 200, // Thoda chhota
+                    width: 200,
                     child: ElevatedButton(
                       onPressed: _verify,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFFC7EFFF),
+                        backgroundColor: const Color(0xFFC7EFFF),
                         foregroundColor: Colors.black,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         side: const BorderSide(color: Colors.blueAccent),
@@ -246,7 +275,7 @@ class _LetGetStartedScreen3State extends State<LetGetStartedScreen3> {
 
           // Grey keypad area
           Expanded(
-            flex: 5, // Kam size
+            flex: 5,
             child: Container(
               width: double.infinity,
               color: Colors.grey.shade300,
