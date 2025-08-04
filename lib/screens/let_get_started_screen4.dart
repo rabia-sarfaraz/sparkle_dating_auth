@@ -60,7 +60,7 @@ class _LetGetStartedScreen4State extends State<LetGetStartedScreen4> {
         );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Invalid code. Please try again.')),
+          const SnackBar(content: Text('Invalid code. Please try again.')),
         );
         print("Verification Error: $e");
       }
@@ -122,7 +122,7 @@ class _LetGetStartedScreen4State extends State<LetGetStartedScreen4> {
             color: isActive || isFilled ? Colors.blue : Colors.transparent,
             width: 2,
           ),
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(color: Colors.black12, blurRadius: 4, spreadRadius: 1),
           ],
           borderRadius: BorderRadius.circular(8),
@@ -141,7 +141,6 @@ class _LetGetStartedScreen4State extends State<LetGetStartedScreen4> {
     return Scaffold(
       body: Column(
         children: [
-          // White section
           Expanded(
             flex: 7,
             child: Padding(
@@ -231,29 +230,12 @@ class _LetGetStartedScreen4State extends State<LetGetStartedScreen4> {
               ),
             ),
           ),
-
-          // Grey keypad
           Expanded(
             flex: 5,
             child: Container(
-              width: double.infinity,
               color: Colors.grey.shade300,
               child: Column(
                 children: [
-                  const SizedBox(height: 8),
-                  const Text(
-                    'From Messages',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                  const Text(
-                    '123 456',
-                    style: TextStyle(fontSize: 20, color: Colors.black),
-                  ),
-                  const SizedBox(height: 8),
                   Expanded(
                     child: Column(
                       children: [
@@ -329,7 +311,6 @@ class _LetGetStartedScreen4State extends State<LetGetStartedScreen4> {
                       ],
                     ),
                   ),
-                  Image.asset('assets/images/Line.png', height: 40),
                 ],
               ),
             ),

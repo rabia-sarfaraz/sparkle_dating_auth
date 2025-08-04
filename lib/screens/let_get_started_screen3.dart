@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth_web/firebase_auth_web.dart';
 import 'let_get_started_screen4.dart';
 
 class LetGetStartedScreen3 extends StatefulWidget {
@@ -13,8 +15,8 @@ class _LetGetStartedScreen3State extends State<LetGetStartedScreen3> {
   final TextEditingController _numberController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  String selectedCountry = 'IN';
-  String countryCode = '+91';
+  String selectedCountry = 'PK';
+  String countryCode = '+92';
 
   final List<Map<String, String>> countryCodes = [
     {'name': 'IN', 'code': '+91'},
@@ -22,38 +24,36 @@ class _LetGetStartedScreen3State extends State<LetGetStartedScreen3> {
     {'name': 'US', 'code': '+1'},
   ];
 
-  void _onKeyboardTap(String value) {
-    setState(() {
-      _numberController.text += value;
-    });
-  }
-
-  void _onBackspace() {
-    setState(() {
-      if (_numberController.text.isNotEmpty) {
-        _numberController.text = _numberController.text.substring(
-          0,
-          _numberController.text.length - 1,
-        );
-      }
-    });
-  }
+  RecaptchaVerifier? verifier;
 
   void _verify() async {
     if (_numberController.text.isEmpty) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Please enter your number')));
-    } else {
-      String phoneNumber = '$countryCode${_numberController.text}';
-      print('Sending OTP to: $phoneNumber');
+      return;
+    }
+
+    String phoneNumber = '$countryCode${_numberController.text}';
+    print('Sending OTP to: $phoneNumber');
+
+    try {
+      if (kIsWeb) {
+        verifier = RecaptchaVerifier(
+          container: 'recaptcha-container',
+          size: RecaptchaVerifierSize.normal,
+          theme: RecaptchaVerifierTheme.light,
+          // ✅ Correct: delegateFor not FirebaseAuth.instance directly!
+          auth: FirebaseAuthWeb.instance.delegateFor(app: _auth.app),
+        );
+
+        await verifier!.render();
+      }
 
       await _auth.verifyPhoneNumber(
         phoneNumber: phoneNumber,
         timeout: const Duration(seconds: 60),
         verificationCompleted: (PhoneAuthCredential credential) async {
-          // Auto-verification
-          await _auth.signInWithCredential(credential);
           print("Auto Verified!");
         },
         verificationFailed: (FirebaseAuthException e) {
@@ -76,6 +76,11 @@ class _LetGetStartedScreen3State extends State<LetGetStartedScreen3> {
           print('Timeout: $verificationId');
         },
       );
+    } catch (e) {
+      print("Error: $e");
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
     }
   }
 
@@ -117,12 +122,28 @@ class _LetGetStartedScreen3State extends State<LetGetStartedScreen3> {
     );
   }
 
+  void _onKeyboardTap(String value) {
+    setState(() {
+      _numberController.text += value;
+    });
+  }
+
+  void _onBackspace() {
+    setState(() {
+      if (_numberController.text.isNotEmpty) {
+        _numberController.text = _numberController.text.substring(
+          0,
+          _numberController.text.length - 1,
+        );
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         children: [
-          // White section
           Expanded(
             flex: 7,
             child: Padding(
@@ -134,9 +155,7 @@ class _LetGetStartedScreen3State extends State<LetGetStartedScreen3> {
                     children: [
                       IconButton(
                         icon: const Icon(Icons.arrow_back, color: Colors.black),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
+                        onPressed: () => Navigator.pop(context),
                       ),
                       const Spacer(),
                       const Text(
@@ -152,14 +171,12 @@ class _LetGetStartedScreen3State extends State<LetGetStartedScreen3> {
                     ],
                   ),
                   const SizedBox(height: 32),
-                  const Center(
-                    child: Text(
-                      'Enter Your Number',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.black,
-                      ),
+                  const Text(
+                    'Enter Your Number',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.black,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -174,20 +191,12 @@ class _LetGetStartedScreen3State extends State<LetGetStartedScreen3> {
                         DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
                             value: selectedCountry,
-                            icon: const Icon(
-                              Icons.arrow_drop_down,
-                              size: 16,
-                              color: Colors.black,
-                            ),
+                            icon: const Icon(Icons.arrow_drop_down),
                             items: countryCodes.map((country) {
                               return DropdownMenuItem<String>(
                                 value: country['name'],
                                 child: Text(
                                   '${country['name']} ${country['code']}',
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.black,
-                                  ),
                                 ),
                               );
                             }).toList(),
@@ -216,85 +225,28 @@ class _LetGetStartedScreen3State extends State<LetGetStartedScreen3> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const Center(
-                    child: Text(
-                      "We'll text you a verification code",
-                      style: TextStyle(fontSize: 14, color: Colors.black54),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 5,
-                        height: 5,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade400,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      const Flexible(
-                        child: Text(
-                          "By signing up, you agree to the Terms of Service and Privacy Policy",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 12, color: Colors.black54),
-                        ),
-                      ),
-                    ],
+                  const Text(
+                    "We'll text you a verification code",
+                    style: TextStyle(fontSize: 14, color: Colors.black54),
                   ),
                   const SizedBox(height: 24),
                   SizedBox(
                     width: 200,
                     child: ElevatedButton(
                       onPressed: _verify,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFC7EFFF),
-                        foregroundColor: Colors.black,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        side: const BorderSide(color: Colors.blueAccent),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                      ),
-                      child: const Text(
-                        'Verify',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
+                      child: const Text('Verify'),
                     ),
                   ),
                 ],
               ),
             ),
           ),
-
-          // Grey keypad area
           Expanded(
             flex: 5,
             child: Container(
-              width: double.infinity,
               color: Colors.grey.shade300,
               child: Column(
                 children: [
-                  const SizedBox(height: 8),
-                  const Text(
-                    'From Messages',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                  const Text(
-                    '123 456',
-                    style: TextStyle(fontSize: 20, color: Colors.black),
-                  ),
-                  const SizedBox(height: 8),
                   Expanded(
                     child: Column(
                       children: [
@@ -358,11 +310,7 @@ class _LetGetStartedScreen3State extends State<LetGetStartedScreen3> {
                             Expanded(
                               child: InkWell(
                                 onTap: _onBackspace,
-                                child: const Icon(
-                                  Icons.backspace,
-                                  size: 28,
-                                  color: Colors.black,
-                                ),
+                                child: const Icon(Icons.backspace, size: 28),
                               ),
                             ),
                           ],
@@ -370,7 +318,6 @@ class _LetGetStartedScreen3State extends State<LetGetStartedScreen3> {
                       ],
                     ),
                   ),
-                  Image.asset('assets/images/Line.png', height: 40),
                 ],
               ),
             ),

@@ -49,13 +49,12 @@ void main() async {
   // ✅ Initialize Firebase before runApp
   await Firebase.initializeApp(
     options: const FirebaseOptions(
-      apiKey: "AIzaSyDa5z3frun5PXpt_kV9BY-q7yKZ1fhNV1U",
-      authDomain: "fir-authproject-73ffc.firebaseapp.com",
-      projectId: "fir-authproject-73ffc",
-      storageBucket: "fir-authproject-73ffc.appspot.com",
-      messagingSenderId: "705935518204",
-      appId: "1:705935518204:web:e1077db5c6e2ab7a8e2a79",
-      measurementId: "G-MGMRZ8HTDB",
+      apiKey: "AIzaSyB0XMCuLF65d-CiJM5VoNMlE3KBAP5lTN0",
+      authDomain: "sparkle-dating-auth.firebaseapp.com",
+      projectId: "sparkle-dating-auth",
+      storageBucket: "sparkle-dating-auth.appspot.com",
+      messagingSenderId: "789877790466",
+      appId: "1:789877790466:android:4323b07a284e01cc43941b",
     ),
   );
 
