@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # sparkle_dating
 
 A new Flutter project.
@@ -14,3 +15,6 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+=======
+# sparkle_dating_auth
+>>>>>>> db0ab518327d1413745fd9986439a1506bc966ae
